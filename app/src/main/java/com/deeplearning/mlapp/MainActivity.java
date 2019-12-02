@@ -28,6 +28,7 @@ import androidx.core.content.FileProvider;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 123;
+    private static final int REQUEST_OPEN_GALLERY  = 124;
     private TextView messageTv;
     private ImageView imageView;
     private String currentPhotoPath;
@@ -55,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 messageTv.setVisibility(View.GONE);
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent,"Select Picture"), REQUEST_OPEN_GALLERY);
             }
         });
 
@@ -127,12 +131,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            try {
-                Bitmap mImageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.fromFile(new File(currentPhotoPath)));
-                imageView.setImageBitmap(mImageBitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
+
+        if (resultCode == RESULT_OK) {
+
+            switch(requestCode){
+
+                case REQUEST_OPEN_GALLERY:
+                    Uri selectedImageUri = data.getData();
+                    try {
+                        Bitmap mImageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
+                        imageView.setImageBitmap(mImageBitmap);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case REQUEST_IMAGE_CAPTURE:
+                    try {
+                        Bitmap mImageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.fromFile(new File(currentPhotoPath)));
+                        imageView.setImageBitmap(mImageBitmap);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
             }
         }
     }
